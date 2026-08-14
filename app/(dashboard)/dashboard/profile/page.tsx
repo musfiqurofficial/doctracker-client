@@ -320,9 +320,9 @@ export default function AdminProfilePage() {
               <Badge variant="info">Last 3 Days</Badge>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto max-h-[360px] overflow-y-auto">
               <table className="w-full text-left text-xs text-foreground">
-                <thead className="bg-muted/50 border-b border-border uppercase font-semibold text-muted-foreground text-[10px]">
+                <thead className="bg-muted/90 backdrop-blur border-b border-border uppercase font-semibold text-muted-foreground text-[10px] sticky top-0 z-10">
                   <tr>
                     <th className="py-3 px-4">Event Action</th>
                     <th className="py-3 px-4">Timestamp</th>
