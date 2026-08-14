@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { getDoctorsApi, createDoctorApi, updateDoctorApi, deleteDoctorApi } from '@/lib/api/doctors';
 import { Doctor, DoctorInput } from '@/types/doctor';
 
-export default function DoctorsPage() {
+function DoctorsPageContent() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
@@ -563,5 +563,13 @@ export default function DoctorsPage() {
         isLoading={deleteMutation.isPending}
       />
     </div>
+  );
+}
+
+export default function DoctorsPage() {
+  return (
+    <Suspense fallback={<div className="p-12 text-center text-xs text-muted-foreground font-medium bg-card border border-border rounded shadow-sm">Loading doctors directory...</div>}>
+      <DoctorsPageContent />
+    </Suspense>
   );
 }

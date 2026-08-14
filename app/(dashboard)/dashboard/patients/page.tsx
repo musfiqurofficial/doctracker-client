@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Edit, Trash2, User, Calendar, Stethoscope, AlertCircle } from 'lucide-react';
@@ -19,7 +19,7 @@ import { getDoctorsApi } from '@/lib/api/doctors';
 import { AddEditPatientModal, PatientFormData } from '@/components/patients/AddEditPatientModal';
 import { DeletePatientModal } from '@/components/patients/DeletePatientModal';
 
-export default function PatientsPage() {
+function PatientsPageContent() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
@@ -402,5 +402,13 @@ export default function PatientsPage() {
         isDeleting={deleteMutation.isPending}
       />
     </div>
+  );
+}
+
+export default function PatientsPage() {
+  return (
+    <Suspense fallback={<div className="p-12 text-center text-xs text-muted-foreground font-medium bg-card border border-border rounded shadow-sm">Loading patients roster...</div>}>
+      <PatientsPageContent />
+    </Suspense>
   );
 }
