@@ -50,30 +50,32 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   ]);
 
   useEffect(() => {
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1\/?$/, '');
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL;
+    const isLocalhost =
+      typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-    // Skip socket connection if no valid socket URL or deployed on serverless platform without dedicated socket server
-    if (!socketUrl) {
+    // Skip WebSocket connection on Vercel serverless production unless explicit socket server URL is provided
+    if (!socketUrl && !isLocalhost) {
       return;
     }
 
+    const targetUrl = socketUrl || 'http://localhost:5000';
     let socketInstance: Socket | null = null;
 
     try {
-      socketInstance = io(socketUrl, {
+      socketInstance = io(targetUrl, {
         transports: ['websocket', 'polling'],
-        reconnection: false, // Prevents endless 404 polling loops on serverless Vercel
-        timeout: 4000,
+        reconnection: false,
+        timeout: 3000,
         withCredentials: true,
       });
 
       socketInstance.on('connect', () => {
-        console.log('[SocketProvider] Real-time socket connected:', socketInstance?.id);
         setIsConnected(true);
       });
 
       socketInstance.on('connect_error', () => {
-        // Disconnect immediately on serverless 404 to avoid console spam
         setIsConnected(false);
         if (socketInstance) {
           socketInstance.disconnect();
