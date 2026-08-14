@@ -35,7 +35,16 @@ const SocketContext = createContext<SocketContextType>({
 
 export const useSocket = () => useContext(SocketContext);
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000';
+// Dynamically resolve Socket server URL from environment or API URL
+const getSocketUrl = () => {
+  if (process.env.NEXT_PUBLIC_SOCKET_URL) {
+    return process.env.NEXT_PUBLIC_SOCKET_URL;
+  }
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/v1\/?$/, '').replace(/\/api\/?$/, '');
+  }
+  return 'http://localhost:5000';
+};
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -44,7 +53,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     {
       id: 'init-1',
       title: 'Welcome Admin',
-      message: 'Real-time WebSocket notification system is active.',
+      message: 'Real-time notification system initialized.',
       type: 'info',
       timestamp: 'Just now',
       isRead: false,
@@ -52,12 +61,16 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   ]);
 
   useEffect(() => {
-    const socketInstance = io(SOCKET_URL, {
-      transports: ['websocket', 'polling'],
+    const socketUrl = getSocketUrl();
+    
+    // Only attempt socket connection if URL exists
+    const socketInstance = io(socketUrl, {
+      transports: ['polling', 'websocket'], // Try HTTP polling first for Vercel compatibility
       reconnection: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 2000,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 5000,
       withCredentials: true,
+      autoConnect: true,
     });
 
     socketInstance.on('connect', () => {
@@ -65,8 +78,12 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       setIsConnected(true);
     });
 
+    socketInstance.on('connect_error', () => {
+      // Gracefully handle socket connection timeout / fallback on serverless platforms
+      setIsConnected(false);
+    });
+
     socketInstance.on('disconnect', () => {
-      console.log('[SocketProvider] WebSocket disconnected.');
       setIsConnected(false);
     });
 
@@ -95,12 +112,13 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
   const emitTestNotification = async () => {
     try {
-      await fetch(`${SOCKET_URL}/api/notifications/test`, {
+      const socketUrl = getSocketUrl();
+      await fetch(`${socketUrl}/api/v1/notifications/test`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: 'Manual System Test',
-          message: 'Real-time Socket.io alert triggered by Admin user.',
+          message: 'Real-time notification alert triggered by Admin user.',
           type: 'success',
         }),
       });
