@@ -81,8 +81,8 @@ Doctor Tracker Client is an administrative web application built with Next.js Ap
 - **Secret Login Route**: `/secretlogin`
 - **Default Seed Admin Email**: `admin@doctracker.com`
 - **Default Seed Admin Password**: `AdminSecretPassword123!`
-- **Frontend Repository**: `https://github.com/...`
-- **Backend Repository**: `https://github.com/...`
+- **Frontend Repository**: `https://github.com/musfiqurofficial/doctracker-client.git`
+- **Backend Repository**: `https://github.com/musfiqurofficial/doctracker-server.git`
 
 ---
 # doctracker-client
