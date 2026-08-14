@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Activity, Lock, Mail, AlertCircle, ShieldCheck, Clock, Eye, EyeOff } from 'lucide-react';
 import { loginApi, ApiCustomError } from '@/lib/api/auth';
+import { useQueryClient } from '@tanstack/react-query';
 
 const loginSchema = z.object({
   email: z
@@ -22,6 +23,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function SecretLoginPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [retryCountdown, setRetryCountdown] = useState<number>(0);
@@ -68,6 +70,9 @@ export default function SecretLoginPage() {
       setErrorMessage(null);
 
       await loginApi(data);
+
+      // Clear any stale/cached failed query states and force fresh fetch
+      queryClient.clear();
 
       // Set client authentication flag for Next.js middleware cross-domain support
       if (typeof document !== 'undefined') {

@@ -10,8 +10,9 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 1000 * 60 * 5, // 5 minutes cache
-            refetchOnWindowFocus: false,
+            staleTime: 0, // Always treat query data as stale so login/navigation fetches fresh MongoDB stats immediately
+            refetchOnMount: 'always',
+            refetchOnWindowFocus: true,
             retry: 1,
           },
         },

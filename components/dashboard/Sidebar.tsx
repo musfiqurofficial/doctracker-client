@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { logoutApi } from '@/lib/api/auth';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface NavItem {
   name: string;
@@ -50,6 +51,7 @@ const navItems: NavItem[] = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
@@ -62,6 +64,7 @@ export function Sidebar() {
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
+      queryClient.clear();
       if (typeof document !== 'undefined') {
         document.cookie = "is_authenticated=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       }
