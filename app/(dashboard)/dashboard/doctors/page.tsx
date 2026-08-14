@@ -616,9 +616,59 @@ function DoctorsPageContent() {
   );
 }
 
+function DoctorsPageFallback() {
+  return (
+    <div className="space-y-6">
+      {/* Top Header & Action Buttons */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Doctors Directory</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Manage hospital medical staff, specialist schedules, and workload statistics.
+          </p>
+        </div>
+        <div className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded bg-primary text-primary-foreground font-semibold text-sm opacity-90">
+          <span>+ Add New Doctor</span>
+        </div>
+      </div>
+
+      {/* Search & Filter Controls Skeleton */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card border border-border p-4 rounded shadow-sm">
+        <div className="flex-1 max-w-md h-9 bg-muted/40 rounded animate-pulse" />
+        <div className="flex items-center gap-3">
+          <div className="w-40 h-9 bg-muted/40 rounded animate-pulse" />
+          <div className="w-36 h-9 bg-muted/40 rounded animate-pulse" />
+        </div>
+      </div>
+
+      {/* Skeleton Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {Array.from({ length: 8 }).map((_, idx) => (
+          <div key={idx} className="bg-card border border-border rounded p-4 shadow-sm animate-pulse space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded bg-muted/60 flex-shrink-0" />
+                <div className="space-y-2 min-w-0 flex-1">
+                  <div className="h-4 bg-muted/60 rounded w-28" />
+                  <div className="h-3 bg-muted/40 rounded w-20" />
+                </div>
+              </div>
+              <div className="h-5 bg-muted/40 rounded-full w-16" />
+            </div>
+            <div className="space-y-2 pt-2 border-t border-border/40">
+              <div className="h-3 bg-muted/40 rounded w-full" />
+              <div className="h-3 bg-muted/40 rounded w-3/4" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function DoctorsPage() {
   return (
-    <Suspense fallback={<div className="p-12 text-center text-xs text-muted-foreground font-medium bg-card border border-border rounded shadow-sm">Loading doctors directory...</div>}>
+    <Suspense fallback={<DoctorsPageFallback />}>
       <DoctorsPageContent />
     </Suspense>
   );

@@ -411,9 +411,66 @@ function PatientsPageContent() {
   );
 }
 
+function PatientsPageFallback() {
+  return (
+    <div className="space-y-6">
+      {/* Top Header & Action Buttons */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Patients Directory</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Manage hospital patient registry, assigned doctors, and medical case statuses.
+          </p>
+        </div>
+        <div className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded bg-primary text-primary-foreground font-semibold text-sm opacity-90">
+          <span>+ New Patient</span>
+        </div>
+      </div>
+
+      {/* Search & Filter Controls Skeleton */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card border border-border p-4 rounded shadow-sm">
+        <div className="flex-1 max-w-md h-9 bg-muted/40 rounded animate-pulse" />
+        <div className="w-48 h-9 bg-muted/40 rounded animate-pulse" />
+      </div>
+
+      {/* Skeleton Table Rows */}
+      <div className="bg-card border border-border rounded shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-foreground">
+            <thead className="bg-muted/50 border-b border-border text-xs uppercase font-semibold text-muted-foreground">
+              <tr>
+                <th className="py-3.5 px-4">Patient Name</th>
+                <th className="py-3.5 px-4">Age / Gender</th>
+                <th className="py-3.5 px-4">Medical Condition</th>
+                <th className="py-3.5 px-4">Assigned Doctor</th>
+                <th className="py-3.5 px-4">Visit Date</th>
+                <th className="py-3.5 px-4 text-center">Status</th>
+                <th className="py-3.5 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/60">
+              {Array.from({ length: 10 }).map((_, idx) => (
+                <tr key={idx} className="animate-pulse">
+                  <td className="py-4 px-4"><div className="h-4 bg-muted/60 rounded w-36" /></td>
+                  <td className="py-4 px-4"><div className="h-4 bg-muted/40 rounded w-20" /></td>
+                  <td className="py-4 px-4"><div className="h-4 bg-muted/40 rounded w-44" /></td>
+                  <td className="py-4 px-4"><div className="h-4 bg-muted/40 rounded w-32" /></td>
+                  <td className="py-4 px-4"><div className="h-4 bg-muted/40 rounded w-24" /></td>
+                  <td className="py-4 px-4 text-center"><div className="h-5 bg-muted/40 rounded-full w-20 mx-auto" /></td>
+                  <td className="py-4 px-4 text-right"><div className="h-4 bg-muted/40 rounded w-16 ml-auto" /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PatientsPage() {
   return (
-    <Suspense fallback={<div className="p-12 text-center text-xs text-muted-foreground font-medium bg-card border border-border rounded shadow-sm">Loading patients roster...</div>}>
+    <Suspense fallback={<PatientsPageFallback />}>
       <PatientsPageContent />
     </Suspense>
   );
