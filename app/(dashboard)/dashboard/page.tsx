@@ -19,7 +19,7 @@ export default function DashboardPage() {
   const [notification, setNotification] = useState<string | null>(null);
 
   // Fetch Live Real-Time Dashboard Stats from MongoDB
-  const { data: statsResponse, isLoading, isError, error } = useQuery({
+  const { data: statsResponse, isError, error } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: getDashboardStatsApi,
   });
@@ -58,53 +58,48 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {isLoading ? (
-        <div className="p-12 text-center text-xs text-muted-foreground font-medium bg-card border border-border rounded shadow-sm">
-          Loading live MongoDB clinical analytics...
+      {/* Error Alert Banner (Only if server query fails) */}
+      {isError && (
+        <div className="p-4 text-xs text-destructive font-medium bg-destructive/10 border border-destructive/20 rounded shadow-sm flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span>Connection Notice: {(error as Error)?.message || 'Retrying database connection...'}</span>
         </div>
-      ) : isError ? (
-        <div className="p-12 text-center text-xs text-destructive font-medium bg-card border border-border rounded shadow-sm flex flex-col items-center gap-2">
-          <AlertCircle className="w-6 h-6" />
-          <span>Error loading dashboard stats: {(error as Error)?.message || 'Server Connection Failed'}</span>
-        </div>
-      ) : (
-        <>
-          {/* KPI Performance Cards (Grid Cols 2 Layout) */}
-          <AnalyticsKpiCards
-            totalPatients={kpi.totalPatients}
-            totalDoctors={kpi.totalDoctors}
-            activeConsultations={kpi.activeConsultations}
-            efficiencyRate={kpi.efficiencyRate}
-            timeframeLabel="Live Database Stats"
-          />
-
-          {/* Primary Visualizations Grid (Broad Flow Chart taking 2/3 width + Pie Chart taking 1/3) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <PatientTrendsChart data={trendData} timeframeLabel="Live Patient Trends" />
-            </div>
-            <div className="lg:col-span-1">
-              <ConditionPieChart data={conditionData} />
-            </div>
-          </div>
-
-          {/* Secondary Visualizations Grid (50-50 Grid Cols 2: Department Bar Chart + Peak Hours Chart) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <DepartmentBarChart data={departmentData} />
-            <PeakHoursChart data={hourlyData} />
-          </div>
-
-          {/* Bottom Section: Top Doctors Leaderboard + Recent Consultations Table */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1">
-              <TopDoctorsLeaderboard doctors={topDoctors} />
-            </div>
-            <div className="lg:col-span-2">
-              <RecentConsultationsTable consultations={recentConsultations} />
-            </div>
-          </div>
-        </>
       )}
+
+      {/* KPI Performance Cards (Grid Cols 2 Layout - Always Rendered Instantly) */}
+      <AnalyticsKpiCards
+        totalPatients={kpi.totalPatients}
+        totalDoctors={kpi.totalDoctors}
+        activeConsultations={kpi.activeConsultations}
+        efficiencyRate={kpi.efficiencyRate}
+        timeframeLabel="Live Database Stats"
+      />
+
+      {/* Primary Visualizations Grid (Broad Flow Chart + Pie Chart - Always Rendered Instantly) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <PatientTrendsChart data={trendData} timeframeLabel="Live Patient Trends" />
+        </div>
+        <div className="lg:col-span-1">
+          <ConditionPieChart data={conditionData} />
+        </div>
+      </div>
+
+      {/* Secondary Visualizations Grid (Department Bar Chart + Peak Hours Chart) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <DepartmentBarChart data={departmentData} />
+        <PeakHoursChart data={hourlyData} />
+      </div>
+
+      {/* Bottom Section: Top Doctors Leaderboard + Recent Consultations Table */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <TopDoctorsLeaderboard doctors={topDoctors} />
+        </div>
+        <div className="lg:col-span-2">
+          <RecentConsultationsTable consultations={recentConsultations} />
+        </div>
+      </div>
     </div>
   );
 }
