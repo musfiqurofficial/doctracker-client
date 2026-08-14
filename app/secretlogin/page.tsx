@@ -69,6 +69,11 @@ export default function SecretLoginPage() {
 
       await loginApi(data);
 
+      // Set client authentication flag for Next.js middleware cross-domain support
+      if (typeof document !== 'undefined') {
+        document.cookie = "is_authenticated=true; path=/; max-age=86400; SameSite=Lax; Secure";
+      }
+
       // Smooth navigation to dashboard on success
       router.push('/dashboard');
       router.refresh();
