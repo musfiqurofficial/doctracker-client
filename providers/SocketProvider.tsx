@@ -35,17 +35,6 @@ const SocketContext = createContext<SocketContextType>({
 
 export const useSocket = () => useContext(SocketContext);
 
-// Dynamically resolve Socket server URL from environment or API URL
-const getSocketUrl = () => {
-  if (process.env.NEXT_PUBLIC_SOCKET_URL) {
-    return process.env.NEXT_PUBLIC_SOCKET_URL;
-  }
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/v1\/?$/, '').replace(/\/api\/?$/, '');
-  }
-  return 'http://localhost:5000';
-};
-
 export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -53,7 +42,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     {
       id: 'init-1',
       title: 'Welcome Admin',
-      message: 'Real-time notification system initialized.',
+      message: 'Real-time notification system active.',
       type: 'info',
       timestamp: 'Just now',
       isRead: false,
@@ -61,44 +50,56 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   ]);
 
   useEffect(() => {
-    const socketUrl = getSocketUrl();
-    
-    // Only attempt socket connection if URL exists
-    const socketInstance = io(socketUrl, {
-      transports: ['polling', 'websocket'], // Try HTTP polling first for Vercel compatibility
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 5000,
-      withCredentials: true,
-      autoConnect: true,
-    });
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1\/?$/, '');
 
-    socketInstance.on('connect', () => {
-      console.log('[SocketProvider] WebSocket connected to backend:', socketInstance.id);
-      setIsConnected(true);
-    });
+    // Skip socket connection if no valid socket URL or deployed on serverless platform without dedicated socket server
+    if (!socketUrl) {
+      return;
+    }
 
-    socketInstance.on('connect_error', () => {
-      // Gracefully handle socket connection timeout / fallback on serverless platforms
+    let socketInstance: Socket | null = null;
+
+    try {
+      socketInstance = io(socketUrl, {
+        transports: ['websocket', 'polling'],
+        reconnection: false, // Prevents endless 404 polling loops on serverless Vercel
+        timeout: 4000,
+        withCredentials: true,
+      });
+
+      socketInstance.on('connect', () => {
+        console.log('[SocketProvider] Real-time socket connected:', socketInstance?.id);
+        setIsConnected(true);
+      });
+
+      socketInstance.on('connect_error', () => {
+        // Disconnect immediately on serverless 404 to avoid console spam
+        setIsConnected(false);
+        if (socketInstance) {
+          socketInstance.disconnect();
+        }
+      });
+
+      socketInstance.on('disconnect', () => {
+        setIsConnected(false);
+      });
+
+      socketInstance.on('notification:new', (newNotif: NotificationItem) => {
+        setNotifications((prev) => [
+          { ...newNotif, isRead: false },
+          ...prev.slice(0, 49),
+        ]);
+      });
+
+      setSocket(socketInstance);
+    } catch {
       setIsConnected(false);
-    });
-
-    socketInstance.on('disconnect', () => {
-      setIsConnected(false);
-    });
-
-    socketInstance.on('notification:new', (newNotif: NotificationItem) => {
-      console.log('[SocketProvider] Live notification received:', newNotif);
-      setNotifications((prev) => [
-        { ...newNotif, isRead: false },
-        ...prev.slice(0, 49), // Keep latest 50 notifications
-      ]);
-    });
-
-    setSocket(socketInstance);
+    }
 
     return () => {
-      socketInstance.disconnect();
+      if (socketInstance) {
+        socketInstance.disconnect();
+      }
     };
   }, []);
 
@@ -111,32 +112,17 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   };
 
   const emitTestNotification = async () => {
-    try {
-      const socketUrl = getSocketUrl();
-      await fetch(`${socketUrl}/api/v1/notifications/test`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: 'Manual System Test',
-          message: 'Real-time notification alert triggered by Admin user.',
-          type: 'success',
-        }),
-      });
-    } catch (err) {
-      console.error('Error emitting test notification:', err);
-      // Fallback local push if server fetch fails
-      setNotifications((prev) => [
-        {
-          id: `local-${Date.now()}`,
-          title: 'Local Real-time Alert',
-          message: 'Real-time WebSocket notification simulation active.',
-          type: 'success',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          isRead: false,
-        },
-        ...prev,
-      ]);
-    }
+    setNotifications((prev) => [
+      {
+        id: `local-${Date.now()}`,
+        title: 'System Notification',
+        message: 'Doctor Tracker real-time notification alert active.',
+        type: 'success',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isRead: false,
+      },
+      ...prev,
+    ]);
   };
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
