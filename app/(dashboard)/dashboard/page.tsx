@@ -1,0 +1,110 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { 
+  CheckCircle2,
+  AlertCircle
+} from 'lucide-react';
+import { AnalyticsKpiCards } from '@/components/dashboard/AnalyticsKpiCards';
+import { PatientTrendsChart } from '@/components/dashboard/PatientTrendsChart';
+import { DepartmentBarChart } from '@/components/dashboard/DepartmentBarChart';
+import { ConditionPieChart } from '@/components/dashboard/ConditionPieChart';
+import { PeakHoursChart } from '@/components/dashboard/PeakHoursChart';
+import { TopDoctorsLeaderboard } from '@/components/dashboard/TopDoctorsLeaderboard';
+import { RecentConsultationsTable } from '@/components/dashboard/RecentConsultationsTable';
+import { getDashboardStatsApi } from '@/lib/api/dashboard';
+
+export default function DashboardPage() {
+  const [notification, setNotification] = useState<string | null>(null);
+
+  // Fetch Live Real-Time Dashboard Stats from MongoDB
+  const { data: statsResponse, isLoading, isError, error } = useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: getDashboardStatsApi,
+  });
+
+  const stats = statsResponse?.data;
+
+  const kpi = stats?.kpi || {
+    totalDoctors: 0,
+    totalPatients: 0,
+    activeConsultations: 0,
+    efficiencyRate: 100,
+  };
+
+  const trendData = stats?.trendData || [];
+  const departmentData = stats?.departmentData || [];
+  const conditionData = stats?.conditionData || [];
+  const hourlyData = stats?.hourlyData || [];
+  const topDoctors = stats?.topDoctors || [];
+  const recentConsultations = stats?.recentConsultations || [];
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Toast Notification Banner */}
+      {notification && (
+        <div className="p-3 rounded bg-primary/10 border border-primary/30 text-primary text-xs font-semibold flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-200 shadow-sm">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+            <span>{notification}</span>
+          </div>
+          <button
+            onClick={() => setNotification(null)}
+            className="text-xs text-muted-foreground hover:text-foreground font-bold px-2"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="p-12 text-center text-xs text-muted-foreground font-medium bg-card border border-border rounded shadow-sm">
+          Loading live MongoDB clinical analytics...
+        </div>
+      ) : isError ? (
+        <div className="p-12 text-center text-xs text-destructive font-medium bg-card border border-border rounded shadow-sm flex flex-col items-center gap-2">
+          <AlertCircle className="w-6 h-6" />
+          <span>Error loading dashboard stats: {(error as Error)?.message || 'Server Connection Failed'}</span>
+        </div>
+      ) : (
+        <>
+          {/* KPI Performance Cards (Grid Cols 2 Layout) */}
+          <AnalyticsKpiCards
+            totalPatients={kpi.totalPatients}
+            totalDoctors={kpi.totalDoctors}
+            activeConsultations={kpi.activeConsultations}
+            efficiencyRate={kpi.efficiencyRate}
+            timeframeLabel="Live Database Stats"
+          />
+
+          {/* Primary Visualizations Grid (Broad Flow Chart taking 2/3 width + Pie Chart taking 1/3) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <PatientTrendsChart data={trendData} timeframeLabel="Live Patient Trends" />
+            </div>
+            <div className="lg:col-span-1">
+              <ConditionPieChart data={conditionData} />
+            </div>
+          </div>
+
+          {/* Secondary Visualizations Grid (50-50 Grid Cols 2: Department Bar Chart + Peak Hours Chart) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <DepartmentBarChart data={departmentData} />
+            <PeakHoursChart data={hourlyData} />
+          </div>
+
+          {/* Bottom Section: Top Doctors Leaderboard + Recent Consultations Table */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-1">
+              <TopDoctorsLeaderboard doctors={topDoctors} />
+            </div>
+            <div className="lg:col-span-2">
+              <RecentConsultationsTable consultations={recentConsultations} />
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
