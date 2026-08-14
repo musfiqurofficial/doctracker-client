@@ -278,11 +278,17 @@ function PatientsPageContent() {
 
             <tbody className="divide-y divide-border/60">
               {isLoading ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-muted-foreground text-xs font-medium">
-                    Loading patient records...
-                  </td>
-                </tr>
+                Array.from({ length: 10 }).map((_, idx) => (
+                  <tr key={idx} className="animate-pulse">
+                    <td className="py-4 px-4"><div className="h-4 bg-muted/60 rounded w-36" /></td>
+                    <td className="py-4 px-4"><div className="h-4 bg-muted/40 rounded w-20" /></td>
+                    <td className="py-4 px-4"><div className="h-4 bg-muted/40 rounded w-44" /></td>
+                    <td className="py-4 px-4"><div className="h-4 bg-muted/40 rounded w-32" /></td>
+                    <td className="py-4 px-4"><div className="h-4 bg-muted/40 rounded w-24" /></td>
+                    <td className="py-4 px-4 text-center"><div className="h-5 bg-muted/40 rounded-full w-20 mx-auto" /></td>
+                    <td className="py-4 px-4 text-right"><div className="h-4 bg-muted/40 rounded w-16 ml-auto" /></td>
+                  </tr>
+                ))
               ) : isError ? (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-destructive">

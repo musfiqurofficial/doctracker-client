@@ -304,9 +304,59 @@ function DoctorsPageContent() {
 
       {/* Main Content Area: Switch between Grid View & Table View */}
       {isLoading ? (
-        <div className="bg-card border border-border rounded p-12 text-center text-xs text-muted-foreground font-medium shadow-sm">
-          Loading doctor records...
-        </div>
+        viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, idx) => (
+              <div key={idx} className="bg-card border border-border rounded p-4 shadow-sm animate-pulse space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded bg-muted/60 flex-shrink-0" />
+                    <div className="space-y-2 min-w-0 flex-1">
+                      <div className="h-4 bg-muted/60 rounded w-28" />
+                      <div className="h-3 bg-muted/40 rounded w-20" />
+                    </div>
+                  </div>
+                  <div className="h-5 bg-muted/40 rounded-full w-16" />
+                </div>
+                <div className="space-y-2 pt-2 border-t border-border/40">
+                  <div className="h-3 bg-muted/40 rounded w-full" />
+                  <div className="h-3 bg-muted/40 rounded w-3/4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-card border border-border rounded shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-foreground">
+                <thead className="bg-muted/50 border-b border-border text-xs uppercase font-semibold text-muted-foreground">
+                  <tr>
+                    <th className="py-3.5 px-4">Doctor Name</th>
+                    <th className="py-3.5 px-4">Specialty & Dept</th>
+                    <th className="py-3.5 px-4">Contact Info</th>
+                    <th className="py-3.5 px-4 text-center">Fee & Exp</th>
+                    <th className="py-3.5 px-4 text-center">Patients</th>
+                    <th className="py-3.5 px-4 text-center">Status</th>
+                    <th className="py-3.5 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {Array.from({ length: 10 }).map((_, idx) => (
+                    <tr key={idx} className="animate-pulse">
+                      <td className="py-4 px-4"><div className="h-4 bg-muted/60 rounded w-36" /></td>
+                      <td className="py-4 px-4"><div className="h-4 bg-muted/40 rounded w-28" /></td>
+                      <td className="py-4 px-4"><div className="h-4 bg-muted/40 rounded w-36" /></td>
+                      <td className="py-4 px-4 text-center"><div className="h-4 bg-muted/40 rounded w-16 mx-auto" /></td>
+                      <td className="py-4 px-4 text-center"><div className="h-4 bg-muted/40 rounded w-10 mx-auto" /></td>
+                      <td className="py-4 px-4 text-center"><div className="h-5 bg-muted/40 rounded-full w-20 mx-auto" /></td>
+                      <td className="py-4 px-4 text-right"><div className="h-4 bg-muted/40 rounded w-16 ml-auto" /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
       ) : isError ? (
         <div className="bg-card border border-border rounded p-12 text-center text-destructive text-xs font-medium shadow-sm space-y-2">
           <AlertCircle className="w-6 h-6 mx-auto" />
