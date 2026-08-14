@@ -55,7 +55,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       typeof window !== 'undefined' &&
       (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-    // Skip WebSocket connection on Vercel serverless production unless explicit socket server URL is provided
     if (!socketUrl && !isLocalhost) {
       return;
     }
